@@ -25,9 +25,9 @@ class EmailAddResponse(BaseModel):
     message: str
     email_id: int
 
-class TopicRequest(BaseModel):
+class TopicAdditionRequest(BaseModel):
     topic: str
-    description: str
+    outcome: str
 
 @router.post("/emails/classify", response_model=EmailClassificationResponse)
 async def classify_email(request: EmailRequest):
@@ -45,16 +45,33 @@ async def classify_email(request: EmailRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
-@router.post("/topics")
-async def add_topic(request: TopicRequest):
+@router.post("/emails/store")
+async def store_email(request: EmailWithTopicRequest):
     try:
         inference_service = EmailTopicInferenceService()
+        email = EmailWithTopic(subject=request.subject, body=request.body, topic=request.topic)
+        inference_service.store_email(email)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/topics/add")
+async def add_topic(request: TopicAdditionRequest):
+    try:
+        inference_service = EmailTopicInferenceService()
+        topic = Topic(topic=request.topic, description=request.description)
+        result = inference_service.add_topic(topic)
+        return TopicAdditionRequest(
+            topic = topic.topic,
+            outcome = result
+        )
         print(inference_service)
         print(inference_service.model)
         print(inference_service.model.topics)
         print(inference_service.model.topic_data)
         print(request.topic)
         print(request.topic in inference_service.model.topics)
+        print(topic.topic)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
