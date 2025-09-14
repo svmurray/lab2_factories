@@ -9,12 +9,48 @@ class EmailClassifierModel:
     def __init__(self):
         self.topic_data = self._load_topic_data()
         self.topics = list(self.topic_data.keys())
+        self.email_data = self._load_email_data()
+
+    def _load_email_data(self) -> Dict[str, Dict[str, Any]]:
+        """Load topic data from data/emails.json"""
+        data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'emails.json')
+        with open(data_file, 'r') as f:
+            return json.load(f)    
     
     def _load_topic_data(self) -> Dict[str, Dict[str, Any]]:
         """Load topic data from data/topic_keywords.json"""
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'topic_keywords.json')
         with open(data_file, 'r') as f:
             return json.load(f)
+
+    def add_topic(self, topic: Topic):
+        print('similarity_model file')
+        data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'topic_keywords.json')
+        with open(data_file, 'wr') as f:
+            print('---file open')
+            contents = json.load(f)
+            contents[topic.topic] = topic.description
+            json.dump(contents, data_file)
+
+    def store_email(self, email: EmailWithTopic):
+        print('similarity_model file')
+        data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'emails.json')
+        with open(data_file, 'wr') as f:
+            print('---file open')
+            contents = json.load(f)
+            contents[email.body] = {'topic': email.topic, 'subject': email.subject}
+            json.dump(contents, data_file)
+
+    def predict_similar_email(self, features: Dict[str, Any]) -> str:
+        """Classify email into one of the topics using feature similarity"""
+        scores = {}
+
+        print('in predict_similar_email - model.py')
+        for email in self.email_data:
+            print(email)
+            score = self._calculate_email_score(features, email)
+
+        return max(scores, key=self.email_data[scores.get]['topic'])
     
     def predict(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
@@ -36,6 +72,26 @@ class EmailClassifierModel:
             scores[topic] = float(score)
         
         return scores
+
+    def _calculate_email_score(self, features: Dict[str, Any], email: Dict[str, Any]) -> float:
+        """Calculate similarity score based on length difference"""
+         # Get email embedding from features
+        email_embedding = features.get("email_embeddings_average_embedding", 0.0)
+        
+        # Get topic description and create embedding (description length as embedding)
+        email_body = self.email_data['body'].key
+        stored_email_embedding = float(len(email_body))
+        
+        # Calculate similarity based on inverse distance
+        # Smaller distance = higher similarity
+        distance = abs(email_embedding - stored_email_embedding)
+        
+        # Normalize to 0-1 range using exponential decay
+        # e^(-distance/scale) gives values between 0 and 1
+        scale = 50.0  # Adjust this to control how quickly similarity drops with distance
+        similarity = math.exp(-distance / scale)
+        
+        return similarity
     
     def _calculate_topic_score(self, features: Dict[str, Any], topic: str) -> float:
         """Calculate similarity score based on length difference"""
