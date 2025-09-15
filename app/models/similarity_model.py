@@ -14,8 +14,12 @@ class EmailClassifierModel:
     def _load_email_data(self) -> Dict[str, Dict[str, Any]]:
         """Load topic data from data/emails.json"""
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'emails.json')
-        with open(data_file, 'r') as f:
-            return json.load(f)    
+        result = ''
+        if os.stat(data_file).st_size > 0:
+            with open(data_file, 'r') as f:
+                result = json.load(f)
+        print(result)
+        return result
     
     def _load_topic_data(self) -> Dict[str, Dict[str, Any]]:
         """Load topic data from data/topic_keywords.json"""
@@ -23,23 +27,31 @@ class EmailClassifierModel:
         with open(data_file, 'r') as f:
             return json.load(f)
 
-    def add_topic(self, topic: Topic):
+    def add_topic(self, topic: Dict[str, Any]):
         print('similarity_model file')
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'topic_keywords.json')
-        with open(data_file, 'wr') as f:
+        with open(data_file, 'r') as f:
             print('---file open')
             contents = json.load(f)
-            contents[topic.topic] = topic.description
-            json.dump(contents, data_file)
+        with open(data_file, 'w') as f:
+            print(contents)
+            contents[topic.topic] = {'description': topic.description}
+            json.dump(contents, f)
 
-    def store_email(self, email: EmailWithTopic):
+    def store_email(self, email: Dict[str, Any]):
         print('similarity_model file')
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'emails.json')
-        with open(data_file, 'wr') as f:
+        with open(data_file, 'r') as f:
             print('---file open')
-            contents = json.load(f)
+            print(data_file)
+            if os.stat(data_file).st_size > 0:
+                contents = json.load(f)
+            else:
+                contents = {}
+        with open(data_file, 'w') as f:
             contents[email.body] = {'topic': email.topic, 'subject': email.subject}
-            json.dump(contents, data_file)
+            json.dump(contents, f)
+        return 'Email Added'
 
     def predict_similar_email(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
