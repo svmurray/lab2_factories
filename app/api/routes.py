@@ -14,6 +14,14 @@ class EmailWithTopicRequest(BaseModel):
     subject: str
     body: str
     topic: str
+    
+class TopicAdditionRequest(BaseModel):
+    topic: str
+    description: str
+    
+class EmailWithTopicResponse(BaseModel):
+    body: str
+    outcome: str
 
 class EmailClassificationResponse(BaseModel):
     predicted_topic: str
@@ -25,9 +33,10 @@ class EmailAddResponse(BaseModel):
     message: str
     email_id: int
 
-class TopicAdditionRequest(BaseModel):
+class TopicAdditionResponse(BaseModel):
     topic: str
     outcome: str
+
 
 @router.post("/emails/classify", response_model=EmailClassificationResponse)
 async def classify_email(request: EmailRequest):
@@ -49,8 +58,12 @@ async def classify_email(request: EmailRequest):
 async def store_email(request: EmailWithTopicRequest):
     try:
         inference_service = EmailTopicInferenceService()
-        email = EmailWithTopic(subject=request.subject, body=request.body, topic=request.topic)
-        inference_service.store_email(email)
+        email = EmailWithTopicRequest(subject=request.subject, body=request.body, topic=request.topic)
+        result = inference_service.store_email(email)
+        return EmailWithTopicResponse(
+            body = email.body,
+            outcome = result
+        ) 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -59,19 +72,12 @@ async def store_email(request: EmailWithTopicRequest):
 async def add_topic(request: TopicAdditionRequest):
     try:
         inference_service = EmailTopicInferenceService()
-        topic = Topic(topic=request.topic, description=request.description)
+        topic = TopicAdditionRequest(topic=request.topic, description=request.description)
         result = inference_service.add_topic(topic)
-        return TopicAdditionRequest(
+        return TopicAdditionResponse(
             topic = topic.topic,
             outcome = result
         )
-        print(inference_service)
-        print(inference_service.model)
-        print(inference_service.model.topics)
-        print(inference_service.model.topic_data)
-        print(request.topic)
-        print(request.topic in inference_service.model.topics)
-        print(topic.topic)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

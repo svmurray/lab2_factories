@@ -15,7 +15,7 @@ class EmailWithTopic:
 
 @dataclass
 class Topic:
-"""Dataclass representing an email with topic and description"""
+    """Dataclass representing an email with topic and description"""
     topic: str
     description: str
     

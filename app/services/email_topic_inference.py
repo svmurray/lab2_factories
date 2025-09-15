@@ -30,21 +30,20 @@ class EmailTopicInferenceService:
             "email": email
         }
 
-    def add_topic(self, topic: Topic):
+    def add_topic(self, topic: Dict[str, Any]):
         """Add topic to topics list"""
-        if Topic.topic not in self.model.topics:
+        if topic.topic not in self.model.topics:
             print('email_topic_inference file')
-            self.model.add_topic(Topic)
+            self.model.add_topic(topic)
             return 'Topic Added'
-        else
+        else:
             return 'Topic already exists'
 
-    def store_email(self, email: EmailWithTopic):
+    def store_email(self, email: Dict[str, Any]):
         """Store email in emails list"""
         print('email_topic_inference file')
-        self.model.store_email(email)
-        return 'Email Added'
-    
+        return self.model.store_email(email)
+
     def get_pipeline_info(self) -> Dict[str, Any]:
         """Get information about the inference pipeline"""
         return {
