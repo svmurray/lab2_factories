@@ -5,6 +5,7 @@ class Email:
     """Dataclass representing an email with subject and body"""
     subject: str
     body: str
+    predict_type: str
 
 @dataclass
 class EmailWithTopic:
