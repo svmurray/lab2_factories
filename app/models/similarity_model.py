@@ -53,7 +53,7 @@ class EmailClassifierModel:
             json.dump(contents, f)
         return 'Email Added'
 
-    def predict_similar_email(self, features: Dict[str, Any]) -> str:
+    def predict_by_email(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
         scores = {}
 
@@ -64,7 +64,7 @@ class EmailClassifierModel:
 
         return max(scores, key=self.email_data[scores.get]['topic'])
     
-    def predict(self, features: Dict[str, Any]) -> str:
+    def predict_by_topic(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
         scores = {}
         
@@ -74,6 +74,15 @@ class EmailClassifierModel:
             scores[topic] = score
         
         return max(scores, key=scores.get)
+
+    def predict(self, features: Dict[str, Any], predict_type: str='topic') -> str:
+        print(f'predict_type: {predict_type}')
+        if predict_type == 'topic':
+            print(f'topic')
+            return predict_by_topic(features)
+        elif predict_type == 'email'
+            print(f'email')
+            return predict_by_email(features)
     
     def get_topic_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
         """Get classification scores for all topics"""
