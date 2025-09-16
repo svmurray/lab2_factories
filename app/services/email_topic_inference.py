@@ -17,8 +17,8 @@ class EmailTopicInferenceService:
         features = self.feature_factory.generate_all_features(email)
         
         # Step 2: Classify using features
-        predicted_topic = self.model.predict(features)
-        # predicted_topic = self.model.predict_similar_email(features)
+        print(f'Email obj: {email}')
+        predicted_topic = self.model.predict(features, email.predict_type)
         topic_scores = self.model.get_topic_scores(features)
         
         # Return comprehensive results
