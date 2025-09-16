@@ -51,20 +51,29 @@ class EmailClassifierModel:
         with open(data_file, 'w') as f:
             contents[email.body] = {'topic': email.topic, 'subject': email.subject}
             json.dump(contents, f)
+        print(self.email_data)
+        print(self.topic_data)
+        self.email_data = self._load_email_data()
+        self.topic_data = self._load_topic_data()
+        print(self.email_data)
+        print(self.topic_data)
         return 'Email Added'
 
-    def predict_by_email(self, features: Dict[str, Any]) -> str:
+    def _predict_by_email(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
         scores = {}
 
-        print('in predict_similar_email - model.py')
         for email in self.email_data:
-            print(email)
             score = self._calculate_email_score(features, email)
 
-        return max(scores, key=self.email_data[scores.get]['topic'])
+        if scores != {}:
+            result = max(scores, key=self.email_data[scores.get]['topic'])
+        else:
+            result = self._predict_by_topic(features)
+
+        return result
     
-    def predict_by_topic(self, features: Dict[str, Any]) -> str:
+    def _predict_by_topic(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
         scores = {}
         
@@ -79,10 +88,10 @@ class EmailClassifierModel:
         print(f'predict_type: {predict_type}')
         if predict_type == 'topic':
             print(f'topic')
-            return predict_by_topic(features)
-        elif predict_type == 'email'
+            return self._predict_by_topic(features)
+        elif predict_type == 'email':
             print(f'email')
-            return predict_by_email(features)
+            return self._predict_by_email(features)
     
     def get_topic_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
         """Get classification scores for all topics"""
@@ -99,10 +108,9 @@ class EmailClassifierModel:
          # Get email embedding from features
         email_embedding = features.get("email_embeddings_average_embedding", 0.0)
         
-        # Get topic description and create embedding (description length as embedding)
-        email_body = self.email_data['body'].key
-        stored_email_embedding = float(len(email_body))
-        
+        # Create embedding (email body length as embedding)
+        stored_email_embedding = float(len(email))
+
         # Calculate similarity based on inverse distance
         # Smaller distance = higher similarity
         distance = abs(email_embedding - stored_email_embedding)
@@ -111,7 +119,7 @@ class EmailClassifierModel:
         # e^(-distance/scale) gives values between 0 and 1
         scale = 50.0  # Adjust this to control how quickly similarity drops with distance
         similarity = math.exp(-distance / scale)
-        
+
         return similarity
     
     def _calculate_topic_score(self, features: Dict[str, Any], topic: str) -> float:
