@@ -9,6 +9,7 @@ router = APIRouter()
 class EmailRequest(BaseModel):
     subject: str
     body: str
+    predict_type: str
 
 class EmailWithTopicRequest(BaseModel):
     subject: str
@@ -42,7 +43,7 @@ class TopicAdditionResponse(BaseModel):
 async def classify_email(request: EmailRequest):
     try:
         inference_service = EmailTopicInferenceService()
-        email = Email(subject=request.subject, body=request.body)
+        email = Email(subject=request.subject, body=request.body, predict_type=request.predict_type)
         result = inference_service.classify_email(email)
         
         return EmailClassificationResponse(
