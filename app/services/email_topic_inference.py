@@ -17,7 +17,6 @@ class EmailTopicInferenceService:
         features = self.feature_factory.generate_all_features(email)
         
         # Step 2: Classify using features
-        print(f'Email obj: {email}')
         predicted_topic = self.model.predict(features, email.predict_type)
         topic_scores = self.model.get_topic_scores(features)
         email_scores = self.model.get_email_scores(features)
@@ -35,7 +34,6 @@ class EmailTopicInferenceService:
     def add_topic(self, topic: Dict[str, Any]):
         """Add topic to topics list"""
         if topic.topic not in self.model.topics:
-            print('email_topic_inference file')
             self.model.add_topic(topic)
             return 'Topic Added'
         else:
@@ -43,7 +41,6 @@ class EmailTopicInferenceService:
 
     def store_email(self, email: Dict[str, Any]):
         """Store email in emails list"""
-        print('email_topic_inference file')
         return self.model.store_email(email)
 
     def get_pipeline_info(self) -> Dict[str, Any]:
