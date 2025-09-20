@@ -27,6 +27,7 @@ class EmailWithTopicResponse(BaseModel):
 class EmailClassificationResponse(BaseModel):
     predicted_topic: str
     topic_scores: Dict[str, float]
+    email_scores: Dict[str, float]
     features: Dict[str, Any]
     available_topics: List[str]
 
@@ -49,6 +50,7 @@ async def classify_email(request: EmailRequest):
         return EmailClassificationResponse(
             predicted_topic=result["predicted_topic"],
             topic_scores=result["topic_scores"],
+            email_scores=result["email_scores"],
             features=result["features"],
             available_topics=result["available_topics"]
         )

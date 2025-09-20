@@ -37,6 +37,7 @@ class EmailClassifierModel:
             print(contents)
             contents[topic.topic] = {'description': topic.description}
             json.dump(contents, f)
+        self.__init__
 
     def store_email(self, email: Dict[str, Any]):
         print('similarity_model file')
@@ -51,23 +52,19 @@ class EmailClassifierModel:
         with open(data_file, 'w') as f:
             contents[email.body] = {'topic': email.topic, 'subject': email.subject}
             json.dump(contents, f)
-        print(self.email_data)
-        print(self.topic_data)
-        self.email_data = self._load_email_data()
-        self.topic_data = self._load_topic_data()
-        print(self.email_data)
-        print(self.topic_data)
+        self.__init__()
         return 'Email Added'
 
     def _predict_by_email(self, features: Dict[str, Any]) -> str:
         """Classify email into one of the topics using feature similarity"""
         scores = {}
-
+        
         for email in self.email_data:
             score = self._calculate_email_score(features, email)
+            scores[email] = score
 
         if scores != {}:
-            result = max(scores, key=self.email_data[scores.get]['topic'])
+            result = self.email_data[max(scores, key=scores.get)]['topic']
         else:
             result = self._predict_by_topic(features)
 
@@ -92,6 +89,16 @@ class EmailClassifierModel:
         elif predict_type == 'email':
             print(f'email')
             return self._predict_by_email(features)
+            
+    def get_email_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
+        """Get classification scores for all topics"""
+        scores = {}
+        
+        for email in self.email_data:
+            score = self._calculate_email_score(features, email)
+            scores[email] = float(score)
+        
+        return scores
     
     def get_topic_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
         """Get classification scores for all topics"""
@@ -119,7 +126,7 @@ class EmailClassifierModel:
         # e^(-distance/scale) gives values between 0 and 1
         scale = 50.0  # Adjust this to control how quickly similarity drops with distance
         similarity = math.exp(-distance / scale)
-
+        
         return similarity
     
     def _calculate_topic_score(self, features: Dict[str, Any], topic: str) -> float:

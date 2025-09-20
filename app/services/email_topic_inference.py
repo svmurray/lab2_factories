@@ -20,11 +20,13 @@ class EmailTopicInferenceService:
         print(f'Email obj: {email}')
         predicted_topic = self.model.predict(features, email.predict_type)
         topic_scores = self.model.get_topic_scores(features)
+        email_scores = self.model.get_email_scores(features)
         
         # Return comprehensive results
         return {
             "predicted_topic": predicted_topic,
             "topic_scores": topic_scores,
+            "email_scores": email_scores,
             "features": features,
             "available_topics": self.model.topics,
             "email": email
