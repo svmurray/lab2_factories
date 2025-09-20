@@ -18,7 +18,6 @@ class EmailClassifierModel:
         if os.stat(data_file).st_size > 0:
             with open(data_file, 'r') as f:
                 result = json.load(f)
-        print(result)
         return result
     
     def _load_topic_data(self) -> Dict[str, Dict[str, Any]]:
@@ -28,23 +27,17 @@ class EmailClassifierModel:
             return json.load(f)
 
     def add_topic(self, topic: Dict[str, Any]):
-        print('similarity_model file')
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'topic_keywords.json')
         with open(data_file, 'r') as f:
-            print('---file open')
             contents = json.load(f)
         with open(data_file, 'w') as f:
-            print(contents)
             contents[topic.topic] = {'description': topic.description}
             json.dump(contents, f)
-        self.__init__
+        self.__init__()
 
     def store_email(self, email: Dict[str, Any]):
-        print('similarity_model file')
         data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'emails.json')
         with open(data_file, 'r') as f:
-            print('---file open')
-            print(data_file)
             if os.stat(data_file).st_size > 0:
                 contents = json.load(f)
             else:
@@ -82,12 +75,9 @@ class EmailClassifierModel:
         return max(scores, key=scores.get)
 
     def predict(self, features: Dict[str, Any], predict_type: str='topic') -> str:
-        print(f'predict_type: {predict_type}')
         if predict_type == 'topic':
-            print(f'topic')
             return self._predict_by_topic(features)
         elif predict_type == 'email':
-            print(f'email')
             return self._predict_by_email(features)
             
     def get_email_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
